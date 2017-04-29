@@ -14,14 +14,14 @@ class HeadlineBlockParser extends AbstractBlockParser {
      *
      * @var boolean
      */
-    protected $isMultilineEnabled = false;
+    protected $isInlineParsingPrevented = false;
     
     /**
      * {@inheritDoc}
      *
      * @var boolean
      */
-    protected $isInlineParsingPrevented = false;
+    protected $isContainer = false;
     
     
     /**

@@ -14,14 +14,14 @@ class QuoteBlockParser extends AbstractBlockParser {
      *
      * @var boolean
      */
-    protected $isMultilineEnabled = true;
+    protected $isInlineParsingPrevented = false;
     
     /**
      * {@inheritDoc}
      *
      * @var boolean
      */
-    protected $isInlineParsingPrevented = false;
+    protected $isContainer = false;
     
     
     /**

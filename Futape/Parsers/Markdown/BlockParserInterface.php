@@ -10,12 +10,12 @@ interface BlockParserInterface {
     /**
      * @return boolean
      */
-    public function isMultilineEnabled();
+    public function isInlineParsingPrevented();
     
     /**
      * @return boolean
      */
-    public function isInlineParsingPrevented();
+    public function isContainer();
     
     /**
      * @param string $value

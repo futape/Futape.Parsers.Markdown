@@ -14,27 +14,27 @@ class ParagraphBlockParser extends AbstractBlockParser {
      *
      * @var boolean
      */
-    protected $isMultilineEnabled = true;
+    protected $isInlineParsingPrevented = false;
     
     /**
      * {@inheritDoc}
      *
      * @var boolean
      */
-    protected $isInlineParsingPrevented = false;
-    
+    protected $isContainer = true;
+
     
     /**
      * {@inheritDoc}
      *
      * @param string $value
      * @param string $tag
-     * @param integer $line Always `0` if multiline isn't enabled
-     * @param boolean $isLastLine Always `true` if multiline isn't enabled
+     * @param integer $line
+     * @param boolean $isLastLine
      * @return string
      */
     public function render($val, $tag, $line, $isLastLine) {
-        $rendered = $val;        
+        $rendered = $val;
         
         if ($line == 0) { // first line
             $rendered = '<p>' . $rendered;

@@ -10,12 +10,14 @@ abstract class AbstractBlockParser implements BlockParserInterface {
     /**
      * @var boolean
      */
-    protected $isMultilineEnabled;
+    protected $isInlineParsingPrevented;
     
     /**
+     * {@inheritDoc}
+     *
      * @var boolean
      */
-    protected $isInlineParsingPrevented;
+    protected $isContainer;
     
     
     /**
@@ -32,8 +34,8 @@ abstract class AbstractBlockParser implements BlockParserInterface {
      *
      * @return boolean
      */
-    public function isMultilineEnabled() {
-        return $this->isMultilineEnabled;
+    public function isInlineParsingPrevented() {
+        return $this->isInlineParsingPrevented;
     }
     
     /**
@@ -41,8 +43,8 @@ abstract class AbstractBlockParser implements BlockParserInterface {
      *
      * @return boolean
      */
-    public function isInlineParsingPrevented() {
-        return $this->isInlineParsingPrevented;
+    public function isContainer() {
+        return $this->isContainer;
     }
     
     /**

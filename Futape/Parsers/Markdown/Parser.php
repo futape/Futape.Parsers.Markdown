@@ -119,28 +119,27 @@ class Parser {
             $block = $parsed['tag'] !== null ? $this->getBlockByTag($parsed['tag']) : false;
             
             if ($block !== false) {
-                $line = 0;
-                $isLastLine = true;
+                $prevLines = 0;
+                $nextLines = 0;
                 
-                if ($block->isMultilineEnabled()) {
-                    $prevLines = 0;
-                    $nextLines = 0;
+                foreach (array_reverse(array_slice($this->parsed, 0, $i)) as $prevParsed) {
+                    $prevBlock = $prevParsed['tag'] !== null ? $this->getBlockByTag($prevParsed['tag']) : false;
                     
-                    foreach (array_reverse(array_slice($this->parsed, 0, $i)) as $prevParsed) {
-                        if ($prevParsed['tag'] == $parsed['tag']) {
-                            $prevLines++;
-                        }
+                    if ($prevBlock !== false && $this->isSameClass($prevBlock, $block)) {
+                        $prevLines++;
                     }
-                    
-                    foreach (array_slice($this->parsed, $i + 1) as $nextParsed) {
-                        if ($nextParsed['tag'] == $parsed['tag']) {
-                            $nextLines++;
-                        }
-                    }
-                    
-                    $line = $prevLines;
-                    $isLastLine = ($nextLines == 0);
                 }
+                
+                foreach (array_slice($this->parsed, $i + 1) as $nextParsed) {
+                    $nextBlock = $nextParsed['tag'] !== null ? $this->getBlockByTag($nextParsed['tag']) : false;
+                    
+                    if ($nextBlock !== false && $this->isSameClass($nextBlock, $block)) {
+                        $nextLines++;
+                    }
+                }
+                
+                $line = $prevLines;
+                $isLastLine = ($nextLines == 0);
                 
                 array_push($rendered, $block->render($value, $parsed['tag'], $line, $isLastLine);
             } else {
@@ -158,6 +157,7 @@ class Parser {
      */
     protected function parse() {
         $this->parseBlocks();
+        $this->processContainerBlocks();
         $this->parseInline();
     }
     
@@ -184,6 +184,35 @@ class Parser {
         }
 
         $this->parsed = $parsed;
+    }
+    
+    /**
+     * @return void
+     */
+    protected function processContainerBlocks) {
+        for ($i = 0; $i < count($this->parsed); $i++) {
+            $parsed = $this->parsed[$i];
+            $block = $parsed['tag'] !== null ? $this->getBlockByTag($parsed['tag']) : false;
+            
+            if ($block !== false && $block->isContainer()) {
+                $nextInlines = 0;
+                
+                foreach (array_slice($this->parsed, $i + 1) as $nextParsed) {
+                    if ($nextParsed['tag'] !== null && $this->getBlockByTag($nextParsed['tag']) !== false) {
+                        break;
+                    }
+                    
+                    $nextInlines++;
+                }
+                
+                $children = array_splice($this->parsed, $i + 1, $nextInlines);
+                $value = implode(array_map(function($val) {
+                    return $val['value'];
+                }, $children), ' ');
+                
+                $this->parsed[$i]['value'] = $value;
+            }
+        }
     }
     
     /**
@@ -380,7 +409,7 @@ class Parser {
         $index = false;
         
         foreach ($haystack as $i => $val) {
-            if (get_class($val) == get_class($needle)) {
+            if ($this->isSameClass($val, $needle)) {
                 $index = $i;
                 
                 break;
@@ -388,6 +417,15 @@ class Parser {
         }
         
         return $index;
+    }
+    
+    /**
+     * @param object $a
+     * @param object $b
+     * @return boolean
+     */
+    protected function isSameClass($a, $b) {
+        return (get_class($a) == get_class($b));
     }
     
     /**

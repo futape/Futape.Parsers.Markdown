@@ -14,14 +14,14 @@ class CodeBlockParser extends AbstractBlockParser {
      *
      * @var boolean
      */
-    protected $isMultilineEnabled = true;
+    protected $isInlineParsingPrevented = true;
     
     /**
      * {@inheritDoc}
      *
      * @var boolean
      */
-    protected $isInlineParsingPrevented = true;
+    protected $isContainer = false;
     
     
     /**
