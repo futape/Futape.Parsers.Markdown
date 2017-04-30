@@ -39,6 +39,14 @@ Renders the given markdown source to HTML.
 
 +   `$markdown`: The markdown source to render.
 
+#### renderFile()
+
+`string renderFile(string $path)`
+
+Renders the contents of the given markdown file to HTML.
+
++   `$path`: The path of the markdown source file to render.
+
 #### addBlockParser()
 
 `void addBlockParser(BlockParserInterface $blockParser)`
