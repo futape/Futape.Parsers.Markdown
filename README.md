@@ -165,6 +165,23 @@ The parser can be easily extended by custom block and inline parsers.
 To do so just create a new class implementing the `BlockParserInterface` or the `InlineParserInterface`, or by extending the `AbstractBlockParser` or the `AbstractInlineParser` respectively.
 Finally add your custom parser instance to the markdown parser instance using the `addBlockParser()` or the `setBlockParsers()`, or the `addInlineParser()` or the `setInlineParsers()` respectively.
 
+By default the list of loaded and used block parsers looks as follows:
+
+1.  `Headline6BlockParser`
+2.  `Headline5BlockParser`
+3.  `Headline4BlockParser`
+4.  `Headline3BlockParser`
+5.  `Headline2BlockParser`
+6.  `Headline1BlockParser`
+7.  `UnorderedListBlockParser`
+8.  `QuoteBlockParser`
+9.  `ParagraphBlockParser`
+
+The list of default inline parsers looks as follows:
+
+1.  `StrongInlineParser`
+2.  `EmphasisInlineParser`
+
 
 
 ## License
