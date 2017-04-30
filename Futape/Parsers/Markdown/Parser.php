@@ -6,7 +6,12 @@ class Parser {
      * @var BlockParserInterface[]
      */
     protected $blocks = array(
-        new HeadlineBlockParser(),
+        new Headline6BlockParser(),
+        new Headline5BlockParser(),
+        new Headline4BlockParser(),
+        new Headline3BlockParser(),
+        new Headline2BlockParser(),
+        new Headline1BlockParser(),
         new UnorderedListBlockParser(),
         new QuoteBlockParser(),
         new ParagraphBlockParser()

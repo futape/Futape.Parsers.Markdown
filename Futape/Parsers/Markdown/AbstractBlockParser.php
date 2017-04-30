@@ -52,8 +52,8 @@ abstract class AbstractBlockParser implements BlockParserInterface {
      *
      * @param string $value
      * @param string $tag
-     * @param integer $line Always `0` if multiline isn't enabled
-     * @param boolean $isLastLine Always `true` if multiline isn't enabled
+     * @param integer $line
+     * @param boolean $isLastLine
      * @return string
      */
     public function render($val, $tag, $line, $isLastLine) {
