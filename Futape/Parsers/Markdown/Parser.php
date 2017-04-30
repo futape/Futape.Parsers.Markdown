@@ -98,7 +98,7 @@ class Parser {
         
         return $this->render($md);
     }
-    
+
     /**
      * Parses and renders input markdown to HTML
      *
@@ -109,45 +109,7 @@ class Parser {
         $this->md = $md;
         $this->parse();
         
-        /**
-         * @var string[]
-         */
-        $rendered = array();
-        
-        foreach ($this->parsed as $parsed) {
-            $value = $this->renderInline($parsed['value']);
-            $block = $parsed['tag'] !== null ? $this->getBlockByTag($parsed['tag']) : false;
-            
-            if ($block !== false) {
-                $prevLines = 0;
-                $nextLines = 0;
-                
-                foreach (array_reverse(array_slice($this->parsed, 0, $i)) as $prevParsed) {
-                    $prevBlock = $prevParsed['tag'] !== null ? $this->getBlockByTag($prevParsed['tag']) : false;
-                    
-                    if ($prevBlock !== false && $this->isSameClass($prevBlock, $block)) {
-                        $prevLines++;
-                    }
-                }
-                
-                foreach (array_slice($this->parsed, $i + 1) as $nextParsed) {
-                    $nextBlock = $nextParsed['tag'] !== null ? $this->getBlockByTag($nextParsed['tag']) : false;
-                    
-                    if ($nextBlock !== false && $this->isSameClass($nextBlock, $block)) {
-                        $nextLines++;
-                    }
-                }
-                
-                $line = $prevLines;
-                $isLastLine = ($nextLines == 0);
-                
-                array_push($rendered, $block->render($value, $parsed['tag'], $line, $isLastLine);
-            } else {
-                array_push($rendered, $value);
-            }
-        }
-        
-        return implode($rendered, "\n");
+        return $this->renderBlocks();
     }
     
     /**
@@ -189,7 +151,7 @@ class Parser {
     /**
      * @return void
      */
-    protected function processContainerBlocks) {
+    protected function processContainerBlocks() {
         for ($i = 0; $i < count($this->parsed); $i++) {
             $parsed = $this->parsed[$i];
             $block = $parsed['tag'] !== null ? $this->getBlockByTag($parsed['tag']) : false;
@@ -198,14 +160,14 @@ class Parser {
                 $nextInlines = 0;
                 
                 foreach (array_slice($this->parsed, $i + 1) as $nextParsed) {
-                    if ($nextParsed['tag'] !== null && $this->getBlockByTag($nextParsed['tag']) !== false) {
+                    if ($nextParsed['tag'] !== null) {
                         break;
                     }
                     
                     $nextInlines++;
                 }
                 
-                $children = array_splice($this->parsed, $i + 1, $nextInlines);
+                $children = array_splice($this->parsed, $i + 1, count($nextInlines));
                 $value = implode(array_map(function($val) {
                     return $val['value'];
                 }, $children), ' ');
@@ -275,7 +237,6 @@ class Parser {
             
             foreach (array_reverse(array_slice($parsed, 0, $i + 1)) as $val) {
                 if ($val['tag'] !== null) {
-                    $val['order'] = 1;
                     array_unshift($group, $val);
                 } else {
                     break;
@@ -283,43 +244,40 @@ class Parser {
             }
             
             if (count($group) > 1) {
-                $nextTags = array();
-                
-                foreach (array_slice($parsed, $i + count($group)) as $val) {
-                    if ($val['tag'] !== null) {
-                        array_push($nextTags, $val['tag']);
-                    }
-                }
-                
+                $nextTags = array_filter(array_slice($parsed, $i + count($group)), function($val) {
+                    return ($val['tag'] !== null);
+                });
                 $groupTags = array_map($group, function($val) {
                     return $val['tag'];
                 });
                 
-                array_walk($group, function(&val) use (&$group, $groupTags, $nextTags) {
-                    if ($val['order'] == 1) {
+                array_walk($group, function(&$val, $i) use (&$group, $groupTags, $nextTags) {
+                    if (!array_key_exists('order', $val)) {
                         $groupClosingTag = array_search($val['tag'], $groupTags);
                         $closingTag = array_search($val['tag'], $nextTags);
                         
                         if ($groupClosingTag !== false) {
-                            $val['order'] = 0;
-                            $group[$groupClosingTag]['order'] = 0;
+                            $val['order'] = -($i + 1);
+                            $group[$groupClosingTag]['order'] = -($i + 1);
                         } else if ($closingTag !== false) {
-                            $val['order'] += $closingTag + 1;
+                            $val['order'] = $closingTag + 1;
+                        } else {
+                            $val['order'] = 0;
                         }
                     }
-                }
+                }, range(0, count($group)));
                 
                 usort($group, function($a, $b) {
                     if ($a['order'] == $b['order']) {
                         return 0;
-                    } else if ($a['order'] == 0) {
+                    } else if ($a['order'] < 0) {
                         return -1;
                     } else {
                         return $a['order'] < $b['order'] ? 1 : -1;
                     }
                 }
                 
-                array_walk($group, function(&val) {
+                array_walk($group, function(&$val) {
                     unset($val['order']);
                 }
             }
@@ -328,6 +286,51 @@ class Parser {
             
             $i -= count($group);
         }
+    }
+    
+    /**
+     * @return string
+     */
+    protected function renderBlocks() {
+        /**
+         * @var string[]
+         */
+        $rendered = array();
+        
+        foreach ($this->parsed as $parsed) {
+            $value = $this->renderInline($parsed['value']);
+            $block = $parsed['tag'] !== null ? $this->getBlockByTag($parsed['tag']) : false;
+            
+            if ($block !== false) {
+                $prevLines = 0;
+                $nextLines = 0;
+                
+                foreach (array_reverse(array_slice($this->parsed, 0, $i)) as $prevParsed) {
+                    $prevBlock = $prevParsed['tag'] !== null ? $this->getBlockByTag($prevParsed['tag']) : false;
+                    
+                    if ($prevBlock !== false && $this->isSameClass($prevBlock, $block)) {
+                        $prevLines++;
+                    }
+                }
+                
+                foreach (array_slice($this->parsed, $i + 1) as $nextParsed) {
+                    $nextBlock = $nextParsed['tag'] !== null ? $this->getBlockByTag($nextParsed['tag']) : false;
+                    
+                    if ($nextBlock !== false && $this->isSameClass($nextBlock, $block)) {
+                        $nextLines++;
+                    }
+                }
+                
+                $line = $prevLines;
+                $isLastLine = ($nextLines == 0);
+                
+                array_push($rendered, $block->render($value, $parsed['tag'], $line, $isLastLine);
+            } else {
+                array_push($rendered, $value);
+            }
+        }
+        
+        return implode($rendered, "\n");
     }
     
     /**
