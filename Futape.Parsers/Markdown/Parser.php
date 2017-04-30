@@ -1,7 +1,9 @@
 <?php
 namespace Futape\Parsers\Markdown;
 
-foreach (array(
+array_map(function($file) {
+    include_once implode(array(rtrim(__DIR__, DIRECTORY_SEPARATOR), $file), DIRECTORY_SEPARATOR);
+}, array(
     'Headline6BlockParser.php',
     'Headline5BlockParser.php',
     'Headline4BlockParser.php',
@@ -15,9 +17,7 @@ foreach (array(
     //'HorizontalRuleBlockParser.php',
     'StrongInlineParser.php',
     'EmphasisInlineParser.php'
-) as $file) {
-    include_once implode(array(rtrim(__DIR__, DIRECTORY_SEPARATOR), $file), DIRECTORY_SEPARATOR);
-}
+));
 
 class Parser {
     /**
