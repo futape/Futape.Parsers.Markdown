@@ -21,7 +21,7 @@ Just a simple extendable [Markdown](https://daringfireball.net/projects/markdown
 
 The parser class is available as `Futape\Parsers\Markdown\Parser`.
 
-###Instance functions
+### Instance functions
 
 #### __construct()
 
