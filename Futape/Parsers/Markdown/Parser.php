@@ -1,31 +1,34 @@
 <?php
 namespace Futape\Parsers\Markdown;
 
+foreach (array(
+    'Headline6BlockParser.php',
+    'Headline5BlockParser.php',
+    'Headline4BlockParser.php',
+    'Headline3BlockParser.php',
+    'Headline2BlockParser.php',
+    'Headline1BlockParser.php',
+    'UnorderedListBlockParser.php',
+    'QuoteBlockParser.php',
+    'ParagraphBlockParser.php',
+    //'CodeBlockParser.php',
+    //'HorizontalRuleBlockParser.php',
+    'StrongInlineParser.php',
+    'EmphasisInlineParser.php'
+) as $file) {
+    include_once implode(array(rtrim(__DIR__, DIRECTORY_SEPARATOR), $file), DIRECTORY_SEPARATOR);
+}
+
 class Parser {
     /**
      * @var BlockParserInterface[]
      */
-    protected $blocks = array(
-        new Headline6BlockParser(),
-        new Headline5BlockParser(),
-        new Headline4BlockParser(),
-        new Headline3BlockParser(),
-        new Headline2BlockParser(),
-        new Headline1BlockParser(),
-        new UnorderedListBlockParser(),
-        new QuoteBlockParser(),
-        new ParagraphBlockParser()
-        //,new CodeBlockParser()
-        //,new HorizontalRuleBlockParser()
-    );
+    protected $blocks;
     
     /**
      * @var InlineParserInterface[]
      */
-    protected $inline = array(
-        new StrongInlineParser(),
-        new EmphasisInlineParser()
-    );
+    protected $inline;
 
     /**
      * @var string
@@ -37,6 +40,29 @@ class Parser {
      */
     protected $parsed;
     
+    
+    /**
+     * @return void
+     */
+    public function __construct() {
+        $this->blocks = array(
+            new Headline6BlockParser(),
+            new Headline5BlockParser(),
+            new Headline4BlockParser(),
+            new Headline3BlockParser(),
+            new Headline2BlockParser(),
+            new Headline1BlockParser(),
+            new UnorderedListBlockParser(),
+            new QuoteBlockParser(),
+            new ParagraphBlockParser()
+            //,new CodeBlockParser()
+            //,new HorizontalRuleBlockParser()
+        );
+        $this->inline = array(
+            new StrongInlineParser(),
+            new EmphasisInlineParser()
+        );
+    }
 
     /**
      * @param BlockParserInterface[] $blockParsers
@@ -133,7 +159,7 @@ class Parser {
      */
     protected function parseBlocks() {
         $md = $this->normalizeNl($this->md);
-        $md = explode($md, "\n");
+        $md = explode("\n", $md);
         $parsed = array();
         
         foreach ($md as $line) {
@@ -172,7 +198,7 @@ class Parser {
                     $nextInlines++;
                 }
                 
-                $children = array_splice($this->parsed, $i + 1, count($nextInlines));
+                $children = array_splice($this->parsed, $i + 1, $nextInlines);
                 $value = implode(array_map(function($val) {
                     return $val['value'];
                 }, $children), ' ');
@@ -202,7 +228,7 @@ class Parser {
                     $value = mb_substr($val['value'], $valueStart, $match[0][1] - $valueStart);
                     
                     array_push($parsed, array(
-                        'tag' => null
+                        'tag' => null,
                         'value' => $value
                     ), array(
                         'tag' => $match[0][0],
@@ -215,13 +241,13 @@ class Parser {
                 
                 if ($value != '') {
                     array_push($parsed, array(
-                        'tag' => null
+                        'tag' => null,
                         'value' => $value
                     ));
                 }
             } else {
                 array_push($parsed, array(
-                    'tag' => null
+                    'tag' => null,
                     'value' => $val['value']
                 ));
             }
@@ -252,9 +278,9 @@ class Parser {
                 $nextTags = array_filter(array_slice($parsed, $i + count($group)), function($val) {
                     return ($val['tag'] !== null);
                 });
-                $groupTags = array_map($group, function($val) {
+                $groupTags = array_map(function($val) {
                     return $val['tag'];
-                });
+                }, $group);
                 
                 array_walk($group, function(&$val, $i) use (&$group, $groupTags, $nextTags) {
                     if (!array_key_exists('order', $val)) {
@@ -280,16 +306,18 @@ class Parser {
                     } else {
                         return $a['order'] < $b['order'] ? 1 : -1;
                     }
-                }
+                });
                 
                 array_walk($group, function(&$val) {
                     unset($val['order']);
-                }
+                });
+                
+                array_splice($parsed, $i + 1 - count($group), count($group), $group);
+                
+                $i -= count($group);
+            } else {
+                $i--;
             }
-            
-            array_splice($parsed, $i + 1 - count($group), count($group), $group);
-            
-            $i -= count($group);
         }
     }
     
@@ -302,7 +330,7 @@ class Parser {
          */
         $rendered = array();
         
-        foreach ($this->parsed as $parsed) {
+        foreach ($this->parsed as $i => $parsed) {
             $value = $this->renderInline($parsed['value']);
             $block = $parsed['tag'] !== null ? $this->getBlockByTag($parsed['tag']) : false;
             
@@ -329,7 +357,7 @@ class Parser {
                 $line = $prevLines;
                 $isLastLine = ($nextLines == 0);
                 
-                array_push($rendered, $block->render($value, $parsed['tag'], $line, $isLastLine);
+                array_push($rendered, $block->render($value, $parsed['tag'], $line, $isLastLine));
             } else {
                 array_push($rendered, $value);
             }
@@ -403,9 +431,9 @@ class Parser {
      * @return string[] The parse definitions' match patterns
      */
     protected function getPatterns($parseDefinitions) {
-        return array_map($parseDefinitions, function($val) {
+        return array_map(function($val) {
             return $val->getPattern();
-        });
+        }, $parseDefinitions);
     }
     
     /**

@@ -1,6 +1,8 @@
 <?php
 namespace Futape\Parsers\Markdown;
 
+include_once implode(array(rtrim(__DIR__, DIRECTORY_SEPARATOR), 'AbstractBlockParser.php'), DIRECTORY_SEPARATOR);
+
 class CodeBlockParser extends AbstractBlockParser {
     /**
      * {@inheritDoc}

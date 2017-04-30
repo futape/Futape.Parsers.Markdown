@@ -1,6 +1,8 @@
 <?php
 namespace Futape\Parsers\Markdown;
 
+include_once implode(array(rtrim(__DIR__, DIRECTORY_SEPARATOR), 'AbstractBlockParser.php'), DIRECTORY_SEPARATOR);
+
 class ParagraphBlockParser extends AbstractBlockParser {
     /**
      * {@inheritDoc}
@@ -40,7 +42,7 @@ class ParagraphBlockParser extends AbstractBlockParser {
             $rendered = '<p>' . $rendered;
         }
         if ($isLastLine) { // last line
-            $rendered .= '</p>'
+            $rendered .= '</p>';
         }
         
         return $rendered;

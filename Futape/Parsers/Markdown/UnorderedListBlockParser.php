@@ -40,7 +40,7 @@ class UnorderedListBlockParser extends AbstractBlockParser {
             $rendered = '<ul>' . "\n" . $rendered;
         }
         if ($isLastLine) { // last line
-            $rendered .= "\n" . '</ul>'
+            $rendered .= "\n" . '</ul>';
         }
         
         return $rendered;
