@@ -107,7 +107,7 @@ Use this function instead of `addInlineParser()` if you have to define the order
 
 ## System requirements
 
-The parser uses PHP OOP and anonymous functions and therefore requires PHP 5.3+.
+The parser has been tested with PHP 5.6.
 
 
 
